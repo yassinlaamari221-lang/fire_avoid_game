@@ -1,61 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>Fire Avoid Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-    body { 
-        margin: 0;
-        overflow: hidden;
-        background: #111;
-        font-family: Arial, sans-serif;
-        color: white;
-        text-align: center;
-    }
-    canvas { 
-        display: block; 
-        margin: 0 auto;
-        background: #111;
-        touch-action: none; /* prevent scrolling */
-    }
-    h1 {
-        margin: 10px 0;
-        font-size: 2em;
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
-    }
-    #level, #final, #maxLevel {
-        font-size: 1.5em;
-        margin-top: 5px;
-        color: #ff8800;
-        text-shadow: 0 0 8px #ff8800;
-    }
-    #restartBtn {
-        display: none;
-        margin-top: 15px;
-        padding: 8px 16px;
-        font-size: 1em;
-        background: #00ffff;
-        color: #111;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow: 0 0 10px #00ffff;
-    }
-    #restartBtn:hover {
-        background: #00cccc;
-    }
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background: #111;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+}
+canvas { 
+    display: block;
+}
+
+h1 {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff;
+    z-index: 10;
+}
+#scores {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    text-align: center;
+}
+#scores p {
+    font-size: 1.5em;
+    margin: 5px 0;
+}
+#levelLabel { color: #ff8800; }
+#maxLevelLabel { color: #ffcc00; }
+#final { color: #00ff88; font-size: 1.6em; }
+
+#restartBtn {
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    padding: 8px 16px;
+    font-size: 1em;
+    background: #00ffff;
+    color: #111;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ffff;
+    z-index: 10;
+}
+#restartBtn:hover { background: #00cccc; }
+
+.arrow {
+    position: absolute;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    background: rgba(0,255,255,0.5);
+    color: #111;
+    font-size: 2em;
+    border-radius: 10px;
+    text-align: center;
+    line-height: 60px;
+    user-select: none;
+    z-index: 10;
+}
+#leftBtn { left: 20px; }
+#rightBtn { right: 20px; }
+.arrow:active { background: rgba(0,255,255,0.8); }
 </style>
 </head>
 <body>
 
 <h1>Avoid the Fire!</h1>
-<p id="level">Level: 1</p>
-<p id="final"></p>
-<p id="maxLevel">Max Level: 0</p>
+<div id="scores">
+    <p id="levelLabel">Level: 1</p>
+    <p id="final"></p>
+    <p id="maxLevelLabel">Max Level: 0</p>
+</div>
 <button id="restartBtn">Restart Game</button>
-<canvas id="game" width="600" height="400"></canvas>
+<canvas id="game"></canvas>
 
-<!-- Optional Sounds -->
+<div id="leftBtn" class="arrow">◀</div>
+<div id="rightBtn" class="arrow">▶</div>
+
 <audio id="hitSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
 <audio id="moveSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
 

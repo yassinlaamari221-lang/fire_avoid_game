@@ -1,6 +1,13 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
 let gameOver = false;
 let level = 1;
 let avoided = 0;
@@ -9,23 +16,24 @@ const hitSound = document.getElementById("hitSound");
 const moveSound = document.getElementById("moveSound");
 const finalText = document.getElementById("final");
 const restartBtn = document.getElementById("restartBtn");
-const maxLevelText = document.getElementById("maxLevel");
+const levelLabel = document.getElementById("levelLabel");
+const maxLevelLabel = document.getElementById("maxLevelLabel");
 
-let maxLevel = localStorage.getItem('maxLevel') || 0;
-maxLevelText.textContent = "Max Level: " + maxLevel;
+let maxLevel = 0; // global max
 
+// Player
 let player = {
-    x: 280,
-    y: 350,
-    width: 25,
-    height: 25,
+    x: canvas.width/2 - 15,
+    y: canvas.height - 60,
+    width: 30,
+    height: 30,
     speed: 6
 };
 
 let fireballs = [];
 let animationId;
 
-// PARTICLES FOR BACKGROUND
+// Background particles
 let particles = [];
 for(let i=0;i<120;i++){
     particles.push({
@@ -37,45 +45,28 @@ for(let i=0;i<120;i++){
     });
 }
 
-// FLASH EFFECT
 let flashTimer = 0;
 
-// KEYBOARD MOVEMENT
+// Keyboard controls
 document.addEventListener("keydown", (e)=>{
     if(gameOver) return;
-    if(e.key === "ArrowLeft" && player.x > 0){
-        player.x -= player.speed;
-        flashTimer = 5;
-        moveSound.play();
-    }
-    if(e.key === "ArrowRight" && player.x + player.width < canvas.width){
-        player.x += player.speed;
-        flashTimer = 5;
-        moveSound.play();
-    }
+    if(e.key === "ArrowLeft"){ player.x -= player.speed; flashTimer=5; moveSound.play();}
+    if(e.key === "ArrowRight"){ player.x += player.speed; flashTimer=5; moveSound.play();}
+    if(player.x<0) player.x=0;
+    if(player.x+player.width>canvas.width) player.x = canvas.width - player.width;
 });
 
-// TOUCH MOVEMENT
-canvas.addEventListener('touchstart', handleTouch);
-canvas.addEventListener('touchmove', handleTouch);
-
-function handleTouch(e){
+// Mobile arrow buttons
+document.getElementById("leftBtn").addEventListener("touchstart", ()=>{
     if(gameOver) return;
-    const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-    if(touchX < canvas.width/2){
-        player.x -= player.speed;
-    } else {
-        player.x += player.speed;
-    }
-    // Keep inside canvas
-    if(player.x < 0) player.x = 0;
-    if(player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-    flashTimer = 5;
-    moveSound.play();
-    e.preventDefault();
-}
+    player.x -= player.speed; if(player.x<0) player.x=0; flashTimer=5; moveSound.play();
+});
+document.getElementById("rightBtn").addEventListener("touchstart", ()=>{
+    if(gameOver) return;
+    player.x += player.speed; if(player.x+player.width>canvas.width) player.x=canvas.width - player.width; flashTimer=5; moveSound.play();
+});
 
-// SPAWN FIREBALLS
+// Spawn fireball
 function spawnFireball(){
     fireballs.push({
         x: Math.random()*(canvas.width-20),
@@ -86,29 +77,17 @@ function spawnFireball(){
     });
 }
 
-// UPDATE FIREBALLS
+// Update fireballs
 function updateFireballs(){
-    let fireSpeed, playerSpeed, spawnRate;
-    if(level < 4){
-        fireSpeed = 3 + level*0.05;
-        playerSpeed = 6 + level*0.05;
-        spawnRate = 0.03 + level*0.003;
-    } else if(level === 4){
-        fireSpeed = 7;
-        playerSpeed = 10;
-        spawnRate = 0.12;
-    } else {
-        fireSpeed = 5 + level*0.1;
-        playerSpeed = 8 + level*0.1;
-        spawnRate = 0.03 + level*0.003;
-    }
+    let fireSpeed = level<4?3+level*0.05:level===4?7:5+level*0.1;
+    let playerSpeed = level<4?6+level*0.05:level===4?10:8+level*0.1;
+    let spawnRate = level<4?0.03+level*0.003:level===4?0.12:0.03+level*0.003;
     player.speed = playerSpeed;
 
     for(let i=0;i<fireballs.length;i++){
         fireballs[i].y += fireSpeed;
         fireballs[i].pulse += 0.1;
 
-        // Collision
         if(fireballs[i].x < player.x + player.width &&
            fireballs[i].x + fireballs[i].width > player.x &&
            fireballs[i].y < player.y + player.height &&
@@ -117,23 +96,18 @@ function updateFireballs(){
                endGame(level);
         }
 
-        // Passed fire
         if(fireballs[i].y > canvas.height){
             avoided++;
             fireballs.splice(i,1);
             i--;
-            if(avoided % 10 === 0){
-                level++;
-                document.getElementById("level").textContent = "Level: "+level;
-            }
+            if(avoided%10===0){ level++; levelLabel.textContent="Level: "+level; }
         }
     }
-
-    if(Math.random() < spawnRate) spawnFireball();
+    if(Math.random()<spawnRate) spawnFireball();
 }
 
-// DRAW BACKGROUND
-let hueShift = 200;
+// Background
+let hueShift=200;
 function drawBackground(){
     const gradient = ctx.createLinearGradient(0,0,0,canvas.height);
     gradient.addColorStop(0, `hsl(${hueShift},60%,10%)`);
@@ -145,29 +119,22 @@ function drawBackground(){
     particles.forEach(p=>{
         ctx.beginPath();
         ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-        ctx.fillStyle = p.color;
+        ctx.fillStyle=p.color;
         ctx.fill();
         p.y += p.speed;
         if(p.y>canvas.height)p.y=0;
     });
 }
 
-// DRAW PLAYER WITH FLASH
+// Draw player
 function drawPlayer(){
-    if(flashTimer>0){
-        ctx.fillStyle = "yellow";
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = "yellow";
-        flashTimer--;
-    } else {
-        ctx.fillStyle = "cyan";
-        ctx.shadowBlur = 0;
-    }
+    if(flashTimer>0){ ctx.fillStyle="yellow"; ctx.shadowBlur=20; ctx.shadowColor="yellow"; flashTimer--; }
+    else{ ctx.fillStyle="cyan"; ctx.shadowBlur=0; }
     ctx.fillRect(player.x,player.y,player.width,player.height);
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur=0;
 }
 
-// DRAW FIREBALLS WITH PULSE
+// Draw fireballs
 function drawFireballs(){
     fireballs.forEach(f=>{
         const size = f.width + Math.sin(f.pulse)*5;
@@ -175,48 +142,44 @@ function drawFireballs(){
         ctx.shadowBlur = 15;
         ctx.shadowColor = `rgb(255,${Math.floor(Math.random()*150)},0)`;
         ctx.fillRect(f.x,f.y,size,size);
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur=0;
     });
 }
 
-// END GAME
+// End game
 function endGame(reachedLevel){
     gameOver = true;
     cancelAnimationFrame(animationId);
     finalText.textContent = "You reached level "+reachedLevel;
-
     if(reachedLevel>maxLevel){
         maxLevel = reachedLevel;
-        localStorage.setItem('maxLevel',maxLevel);
-        maxLevelText.textContent = "Max Level: "+maxLevel;
+        maxLevelLabel.textContent = "Max Level: "+maxLevel;
+        // TODO: update global storage
     }
-
-    restartBtn.style.display = "inline-block";
+    restartBtn.style.display="inline-block";
 }
 
-// RESTART
+// Restart
 function restartGame(){
-    fireballs = [];
-    avoided = 0;
-    level = 1;
-    player.x = 280;
-    player.speed = 6;
-    document.getElementById("level").textContent = "Level: "+level;
-    finalText.textContent = "";
-    restartBtn.style.display = "none";
-    gameOver = false;
+    fireballs=[]; avoided=0; level=1;
+    player.x=canvas.width/2 - 15;
+    player.speed=6;
+    levelLabel.textContent="Level: "+level;
+    finalText.textContent="";
+    restartBtn.style.display="none";
+    gameOver=false;
     gameLoop();
 }
 restartBtn.addEventListener("click",restartGame);
 
-// GAME LOOP
+// Game loop
 function gameLoop(){
     if(gameOver) return;
     drawBackground();
     drawPlayer();
     drawFireballs();
     updateFireballs();
-    animationId = requestAnimationFrame(gameLoop);
+    animationId=requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
