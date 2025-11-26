@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fire Avoid Game</title>
+<style>
+    body { 
+        text-align: center; 
+        background: #111; 
+        color: white; 
+        font-family: Arial; 
+        margin: 0;
+        overflow: hidden;
+    }
+    canvas { 
+        display: block; 
+        margin: 0 auto;
+        background: #111;
+    }
+    h1 {
+        margin-top: 10px;
+        font-size: 2em;
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff;
+    }
+    #level, #final, #maxLevel {
+        font-size: 1.5em;
+        color: #ff8800;
+        text-shadow: 0 0 8px #ff8800;
+        margin-top: 10px;
+    }
+    #restartBtn {
+        display: none;
+        margin-top: 15px;
+        padding: 8px 16px;
+        font-size: 1em;
+        background: #00ffff;
+        color: #111;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 0 0 10px #00ffff;
+    }
+    #restartBtn:hover {
+        background: #00cccc;
+    }
+</style>
+</head>
+<body>
+
+<h1>Avoid the Fire!</h1>
+<p id="level">Level: 1</p>
+<p id="final"></p>
+<p id="maxLevel">Max Level: 0</p>
+<button id="restartBtn">Restart Game</button>
+<canvas id="game" width="600" height="400"></canvas>
+
+<!-- Sounds -->
+<audio id="hitSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
+<audio id="moveSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
+
+<script src="game.js"></script>
+</body>
+</html>
