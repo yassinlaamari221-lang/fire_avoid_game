@@ -1,6 +1,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -27,13 +28,12 @@ let player = {
     y: canvas.height - 60,
     width: 30,
     height: 30,
-    speed: 6
+    speed: 12,
 };
 
 let fireballs = [];
 let animationId;
-
-// Background particles
+//background 
 let particles = [];
 for(let i=0;i<120;i++){
     particles.push({
@@ -79,10 +79,10 @@ function spawnFireball(){
 
 // Update fireballs
 function updateFireballs(){
-    let fireSpeed = level<4?3+level*0.05:level===4?7:5+level*0.1;
-    let playerSpeed = level<4?6+level*0.05:level===4?10:8+level*0.1;
+    let fireSpeed = level<4?3+level*0.006:level===4?7:5+level*0.1;
+    let playerSpeed = level<4?6+level*0.006:level===4?10:8+level*0.1;
     let spawnRate = level<4?0.03+level*0.003:level===4?0.12:0.03+level*0.003;
-    player.speed = playerSpeed;
+    player.speed = playerSpeed+5;
 
     for(let i=0;i<fireballs.length;i++){
         fireballs[i].y += fireSpeed;
@@ -128,8 +128,8 @@ function drawBackground(){
 
 // Draw player
 function drawPlayer(){
-    if(flashTimer>0){ ctx.fillStyle="yellow"; ctx.shadowBlur=20; ctx.shadowColor="yellow"; flashTimer--; }
-    else{ ctx.fillStyle="cyan"; ctx.shadowBlur=0; }
+    if(flashTimer>0){ ctx.fillStyle="blue"; ctx.shadowBlur=20; ctx.shadowColor="yellow"; flashTimer--; }
+    else{ ctx.fillStyle="white"; ctx.shadowBlur=0; }
     ctx.fillRect(player.x,player.y,player.width,player.height);
     ctx.shadowBlur=0;
 }
